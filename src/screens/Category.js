@@ -9,43 +9,31 @@ import {
 } from 'react-native';
 import {Text, Card, Searchbar, Subheading, Paragraph} from 'react-native-paper';
 import {useTheme} from 'react-native-paper';
+import {useIsFocused} from '@react-navigation/core';
 import useDebounce from '../hooks/useDebounce';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
-import RNBootSplash from 'react-native-bootsplash';
 import store from '../assets/store';
 
-const Home = ({theme, navigation}) => {
-  //import paper theme colors
+const Home = ({theme, navigation, route}) => {
   const {colors} = useTheme();
+  const isFocused = useIsFocused();
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebounce(search, 200);
-  const [loader, setLoader] = useState(true);
+  const [loader, setLoader] = useState(false);
   const [cocktails, setCocktails] = useState([]);
   const [categories, setCategories] = useState([]);
+  const name = route.params.name;
   const onSearch = value => {
     setSearch(value);
   };
-  const getCocktails = (val = '') => {
+  const getCocktails = val => {
     return fetch(
-      `https://www.thecocktaildb.com/api/json/v2/${store.apiKey}/search.php?s=${val}`,
-    )
-      .then(response => response.json())
-      .then(data => data.drinks)
-      .catch(error => {
-        console.error(error);
-        return [];
-      });
-  };
-
-  const getCategories = () => {
-    fetch(
-      `https://www.thecocktaildb.com/api/json/v2/${store.apiKey}/list.php?c=list`,
+      `https://www.thecocktaildb.com/api/json/v2/${store.apiKey}/filter.php?c=${val}`,
     )
       .then(response => response.json())
       .then(data => {
-        console.log('categories', data);
-        setCategories(data.drinks);
-        setLoader(false);
+        console.log(data.drinks);
+        setCocktails(data.drinks);
       })
       .catch(error => {
         console.error(error);
@@ -95,6 +83,7 @@ const Home = ({theme, navigation}) => {
       <Card
         style={{...styles.card, marginTop: index === 0 ? 25 : null}}
         elevation={3}
+        //poll drink info to pass to details
         onPress={() =>
           navigation.navigate('Details', {
             name: item.strDrink,
@@ -106,39 +95,9 @@ const Home = ({theme, navigation}) => {
         <Card.Title
           title={item.strDrink}
           titleStyle={styles.cardTitle}
-          subtitle={item.strCategory}
+          titleNumberOfLines={2}
           right={() => RenderThumbnail(item)}
           rightStyle={styles.thumbnailContainer}
-        />
-        <Card.Content>
-          <Subheading>{item.strAlcoholic}</Subheading>
-          <Paragraph>
-            Ingredients: {item.strIngredient1}, {item.strIngredient2},{' '}
-            {item.strIngredient3}
-          </Paragraph>
-        </Card.Content>
-      </Card>
-    ) : null;
-
-  const renderCategory = ({item, index}) =>
-    loader === true ? (
-      <Loader />
-    ) : loader === false ? (
-      <Card
-        style={{...styles.card, marginTop: index === 0 ? 25 : null}}
-        elevation={3}
-        onPress={() =>
-          navigation.navigate('Category', {
-            name: item.strCategory,
-          })
-        }>
-        <Card.Title
-          title={item.strCategory + 's'}
-          titleStyle={styles.cardTitle}
-          right={() => (
-            <FontAwesome5 name="arrow-right" size={35} color={colors.accent} />
-          )}
-          rightStyle={styles.arrowContainer}
         />
       </Card>
     ) : null;
@@ -152,9 +111,10 @@ const Home = ({theme, navigation}) => {
   };
 
   useEffect(() => {
-    // Fire off our API call
-    getCategories();
-  }, []);
+    if (isFocused === true && cocktails.length === 0) {
+      getCocktails(name);
+    }
+  }, [isFocused]);
 
   useEffect(() => {
     if (search.length === 0) {
@@ -185,40 +145,24 @@ const Home = ({theme, navigation}) => {
   );
 
   return (
-    <View
-      style={styles.container}
-      onLayout={() => RNBootSplash.hide({fade: true})}>
+    <View style={styles.container}>
       <StatusBar backgroundColor={colors.background} barStyle="dark-content" />
       <FlatList
-        renderItem={search.length === 0 ? renderCategory : renderDrink}
-        data={search.length === 0 ? categories : cocktails}
+        renderItem={renderDrink}
+        data={cocktails}
         keyExtractor={item => item.idDrink}
         ListHeaderComponent={
-          <Searchbar
-            placeholder="Search Cocktails"
-            onChangeText={onSearch}
-            value={search}
-            style={styles.searchBar}
-          />
+          <View style={styles.header}>
+            <FontAwesome5
+              name="arrow-left"
+              size={35}
+              color={colors.accent}
+              onPress={() => navigation.goBack()}
+            />
+            <Text style={styles.title}>{name + 's'}</Text>
+          </View>
         }
-        ListEmptyComponent={
-          categories.length === 0 ? (
-            <Loader />
-          ) : (
-            <View style={styles.emptyList}>
-              <Text style={styles.emptyListText}>
-                Sorry! We couldn't find that one...
-              </Text>
-              <FontAwesome5
-                name="glass-martini-alt"
-                size={100}
-                color="lightgray"
-              />
-
-              <Text style={styles.emptyListText}>Try again!</Text>
-            </View>
-          )
-        }
+        ListEmptyComponent={<Loader />}
         contentContainerStyle={styles.flatList}
         showsVerticalScrollIndicator={false}
       />
@@ -251,13 +195,7 @@ const styles = StyleSheet.create({
   thumbnailContainer: {
     height: 75,
     width: 75,
-    marginRight: 15,
-    marginTop: 15,
-  },
-  arrowContainer: {
-    height: 75,
-    width: 75,
-    justifyContent: 'center',
+    margin: 25,
   },
   card: {
     marginBottom: 10,
@@ -284,5 +222,16 @@ const styles = StyleSheet.create({
   loader: {
     flex: 1,
     justifyContent: 'center',
+  },
+  title: {
+    fontSize: 36,
+    paddingLeft: 25,
+    width: '95%',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    marginTop: 20,
   },
 });

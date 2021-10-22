@@ -12,6 +12,7 @@ import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import {useTheme} from 'react-native-paper';
 import {useIsFocused} from '@react-navigation/native';
 import Drink from '../components/Drink';
+import store from '../assets/store';
 
 const Types = ({route, navigation, theme}) => {
   const [cocktail, setCocktail] = useState(null);
@@ -19,7 +20,9 @@ const Types = ({route, navigation, theme}) => {
   const isFocused = useIsFocused();
 
   const getRandomCocktail = () => {
-    fetch(`https://www.thecocktaildb.com/api/json/v1/1/random.php`)
+    fetch(
+      `https://www.thecocktaildb.com/api/json/v2/${store.apiKey}/random.php`,
+    )
       .then(response => response.json())
       .then(data => {
         console.log('Cocktail: ', data);

@@ -9,7 +9,7 @@ const theme = {
   roundness: 2,
   colors: {
     ...DefaultTheme.colors,
-    primary: '#3498db',
+    primary: 'rgba(44,45,73,1)',
     accent: 'darkgray',
     background: 'rgba(242,242,242,1)',
   },

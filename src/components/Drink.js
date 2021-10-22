@@ -17,6 +17,7 @@ const Drink = ({image, name, recipe, mix, navigation}) => {
   const RenderItem = ({item}) => (
     <Subheading>
       {item.measure}
+      {item.measure[-1] !== ' ' && ' '}
       {item.ingredient}
     </Subheading>
   );
@@ -26,8 +27,8 @@ const Drink = ({image, name, recipe, mix, navigation}) => {
       <View style={styles.header}>
         <FontAwesome5
           name="arrow-left"
-          size={36}
-          color="darkgray"
+          size={35}
+          color={colors.accent}
           onPress={() => navigation.navigate('Home')}
         />
         <Text style={styles.title}>{name}</Text>
@@ -42,10 +43,10 @@ const Drink = ({image, name, recipe, mix, navigation}) => {
           }
         />
         <Card.Content style={styles.cardContent}>
-          <Caption>RECIPE</Caption>
+          <Caption style={styles.caption}>RECIPE</Caption>
           <Divider />
           <Paragraph style={styles.paragraph}>{recipe}</Paragraph>
-          <Caption>MEASUREMENTS & INGREDIENTS</Caption>
+          <Caption style={styles.caption}>MEASUREMENTS & INGREDIENTS</Caption>
           <Divider style={{marginBottom: 5}} />
           {mix.map((item, index) => (
             <RenderItem item={item} key={item.ingredient + index.toString()} />
@@ -81,15 +82,16 @@ const styles = StyleSheet.create({
   },
   paragraph: {
     fontSize: 20,
-    paddingBottom: 20,
     paddingTop: 10,
   },
   cardContent: {
-    padding: 10,
     flex: 1,
   },
   cardCover: {
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
+  },
+  caption: {
+    paddingTop: 25,
   },
 });

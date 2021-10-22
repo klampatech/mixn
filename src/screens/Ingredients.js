@@ -18,6 +18,7 @@ import {
 } from 'react-native-paper';
 import {useTheme} from 'react-native-paper';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import store from '../assets/store';
 
 const Ingredients = ({theme}) => {
   //import paper theme colors
@@ -30,7 +31,7 @@ const Ingredients = ({theme}) => {
   };
   const getIngredients = (val = '') => {
     setLoader(true);
-    fetch(`https://www.thecocktaildb.com/api/json/v1/1/search.php?i=${val}
+    fetch(`https://www.thecocktaildb.com/api/json/v2/${store.apiKey}/search.php?i=${val}
     `)
       .then(response => response.json())
       .then(data => {

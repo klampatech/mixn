@@ -153,6 +153,7 @@ const Home = ({theme, navigation}) => {
           <Paragraph>
             Ingredients: {item.strIngredient1}, {item.strIngredient2},{' '}
             {item.strIngredient3}
+            {item.strIngredient4 !== null ? ', more...' : ''}
           </Paragraph>
         </Card.Content>
       </Card>

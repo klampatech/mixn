@@ -1,6 +1,6 @@
 {
   "name": "MixN",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "scripts": {
     "android": "source ~/.bash_profile && react-native run-android --deviceId ",

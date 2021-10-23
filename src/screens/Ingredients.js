@@ -26,6 +26,7 @@ const Ingredients = ({theme}) => {
   const [search, setSearch] = useState('');
   const [loader, setLoader] = useState(false);
   const [ingredients, setIngredients] = useState({});
+  const [ingredientList, setIngredientList] = useState([]);
   const onSearch = value => {
     setSearch(value);
   };
@@ -44,22 +45,44 @@ const Ingredients = ({theme}) => {
         }
       });
   };
+  // get list of ingredients for initial list
+  // const getIngredientList = () => {
+  //   setLoader(true);
+  //   fetch(`https://www.thecocktaildb.com/api/json/v2/${store.apiKey}/list.php?i=list
+  //   `)
+  //     .then(response => response.json())
+  //     .then(data => {
+  //       setLoader(false);
+  //       console.log('Ingredients: ', data);
+  //       setIngredientList(data.drinks);
+  //     });
+  // };
 
   const RenderThumbnail = () => {
     return (
-      ingredients.strABV !== null && (
-        <View style={styles.thumbnail}>
-          <Text style={{fontSize: 35}}>{ingredients.strABV}</Text>
-          <Caption>ABV</Caption>
-        </View>
-      )
+      <View style={styles.thumbnailRow}>
+        <Image
+          style={styles.thumbnail}
+          source={{
+            uri: `https://www.thecocktaildb.com/images/ingredients/${ingredients.strIngredient}-Small.png`,
+          }}
+        />
+        {ingredients.strABV !== null && (
+          <View style={styles.thumbnailCircle}>
+            <Text style={{fontSize: 35}}>{ingredients.strABV}</Text>
+            <Caption>ABV</Caption>
+          </View>
+        )}
+      </View>
     );
   };
 
   const RenderItem = ({item}) => (
     <Card style={styles.card} elevation={3}>
       <Card.Title
-        title={item.strIngredient}
+        title={
+          item.strIngredient[0].toUpperCase() + item.strIngredient.slice(1)
+        }
         titleStyle={styles.cardTitle}
         subtitle={'Type: ' + item.strType}
         right={RenderThumbnail}
@@ -100,6 +123,11 @@ const Ingredients = ({theme}) => {
     getIngredients(search);
   }, [search]);
 
+  // display starting ingredient list
+  // useEffect(() => {
+  //   getIngredientList();
+  // }, []);
+
   return (
     <View style={styles.container}>
       <StatusBar backgroundColor={colors.background} barStyle="dark-content" />
@@ -118,7 +146,7 @@ const Ingredients = ({theme}) => {
           <View style={styles.loader}>
             <ActivityIndicator size="large" color={colors.primary} />
           </View>
-        ) : ingredients !== null ? (
+        ) : ingredients !== null && ingredients.strDescription !== null ? (
           <View style={styles.loader}>
             <RenderItem item={ingredients} />
           </View>
@@ -148,15 +176,17 @@ const styles = StyleSheet.create({
   thumbnail: {
     height: 75,
     width: 75,
-    borderRadius: 75,
-    borderWidth: 2,
-    borderColor: 'black',
+  },
+  thumbnailCircle: {
+    height: 75,
+    width: 75,
     alignItems: 'center',
   },
   thumbnailContainer: {
     height: 75,
     width: 75,
-    margin: 20,
+    marginRight: 15,
+    marginTop: 15,
   },
   card: {
     marginBottom: 25,
@@ -189,5 +219,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 20,
+  },
+  thumbnailRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    marginTop: 10,
+    marginRight: 15,
   },
 });

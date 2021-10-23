@@ -77,6 +77,7 @@ const Types = ({route, navigation, theme}) => {
           recipe={cocktail.strInstructions}
           mix={collectIngredients(cocktail)}
           navigation={navigation}
+          back={false}
         />
       )}
     </View>

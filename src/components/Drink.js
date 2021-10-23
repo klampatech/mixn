@@ -11,7 +11,7 @@ import {
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import {useTheme} from 'react-native-paper';
 
-const Drink = ({image, name, recipe, mix, navigation}) => {
+const Drink = ({image, name, recipe, mix, navigation, back = true}) => {
   const {colors} = useTheme();
 
   const RenderItem = ({item}) => (
@@ -22,14 +22,24 @@ const Drink = ({image, name, recipe, mix, navigation}) => {
     </Subheading>
   );
 
+  const navigateBack = () => {
+    if (back !== true) {
+      navigation.navigate('Search', {screen: 'Home'});
+    } else {
+      navigation.goBack();
+    }
+  };
+
   return (
-    <ScrollView contentContainerStyle={{flexGrow: 1}}>
+    <ScrollView
+      contentContainerStyle={{flexGrow: 1}}
+      showsVerticalScrollIndicator={false}>
       <View style={styles.header}>
         <FontAwesome5
-          name="arrow-left"
-          size={35}
+          name="chevron-left"
+          size={25}
           color={colors.accent}
-          onPress={() => navigation.navigate('Home')}
+          onPress={navigateBack}
         />
         <Text style={styles.title}>{name}</Text>
       </View>
@@ -63,7 +73,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 36,
     paddingLeft: 25,
-    width: '95%',
+    paddingRight: 25,
   },
   header: {
     flexDirection: 'row',

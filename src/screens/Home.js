@@ -136,7 +136,11 @@ const Home = ({theme, navigation}) => {
           title={item.strCategory + 's'}
           titleStyle={styles.cardTitle}
           right={() => (
-            <FontAwesome5 name="arrow-right" size={35} color={colors.accent} />
+            <FontAwesome5
+              name="chevron-right"
+              size={25}
+              color={colors.accent}
+            />
           )}
           rightStyle={styles.arrowContainer}
         />
@@ -258,6 +262,7 @@ const styles = StyleSheet.create({
     height: 75,
     width: 75,
     justifyContent: 'center',
+    alignItems: 'center',
   },
   card: {
     marginBottom: 10,

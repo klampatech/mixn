@@ -40,6 +40,23 @@ const Home = ({theme, navigation, route}) => {
       });
   };
 
+  const getDrink = id => {
+    return new Promise(resolve => {
+      fetch(
+        `https://www.thecocktaildb.com/api/json/v2/${store.apiKey}/lookup.php?i=${id}`,
+      )
+        .then(response => response.json())
+        .then(data => {
+          console.log('drink by id', data.drinks);
+          resolve(data.drinks[0]);
+        })
+        .catch(error => {
+          console.error(error);
+          resolve();
+        });
+    });
+  };
+
   const RenderThumbnail = item => {
     return (
       <Image
@@ -84,14 +101,16 @@ const Home = ({theme, navigation, route}) => {
         style={{...styles.card, marginTop: index === 0 ? 25 : null}}
         elevation={3}
         //poll drink info to pass to details
-        onPress={() =>
-          navigation.navigate('Details', {
-            name: item.strDrink,
-            image: item.strDrinkThumb,
-            mix: collectIngredients(item),
-            recipe: item.strInstructions,
-          })
-        }>
+        onPress={() => {
+          getDrink(item.idDrink).then(drink => {
+            navigation.navigate('Details', {
+              name: drink.strDrink,
+              image: drink.strDrinkThumb,
+              mix: collectIngredients(drink),
+              recipe: drink.strInstructions,
+            });
+          });
+        }}>
         <Card.Title
           title={item.strDrink}
           titleStyle={styles.cardTitle}
@@ -154,8 +173,8 @@ const Home = ({theme, navigation, route}) => {
         ListHeaderComponent={
           <View style={styles.header}>
             <FontAwesome5
-              name="arrow-left"
-              size={35}
+              name="chevron-left"
+              size={25}
               color={colors.accent}
               onPress={() => navigation.goBack()}
             />

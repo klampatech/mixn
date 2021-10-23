@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import {
   View,
   StyleSheet,
@@ -7,12 +7,21 @@ import {
   Image,
   ActivityIndicator,
 } from 'react-native';
-import {Text, Card, Searchbar, Subheading, Paragraph} from 'react-native-paper';
+import {
+  Text,
+  Card,
+  Searchbar,
+  Subheading,
+  Paragraph,
+  Portal,
+  IconButton,
+} from 'react-native-paper';
 import {useTheme} from 'react-native-paper';
 import {useIsFocused} from '@react-navigation/core';
 import useDebounce from '../hooks/useDebounce';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import store from '../assets/store';
+import ToTop from '../components/ToTop';
 
 const Home = ({theme, navigation, route}) => {
   const {colors} = useTheme();
@@ -23,6 +32,25 @@ const Home = ({theme, navigation, route}) => {
   const [cocktails, setCocktails] = useState([]);
   const [categories, setCategories] = useState([]);
   const name = route.params.name;
+  const [showScrollToTop, setShowScrollToTop] = useState(false);
+  const scrollRef = useRef(null);
+
+  const toggleScrollToTop = scrollY => {
+    if (scrollY > 300) {
+      if (setShowScrollToTop !== true) {
+        setShowScrollToTop(true);
+      }
+    } else {
+      if (setShowScrollToTop !== false) {
+        setShowScrollToTop(false);
+      }
+    }
+  };
+
+  const scrollToTop = () => {
+    scrollRef.current.scrollToOffset({y: 0, animated: true});
+  };
+
   const onSearch = value => {
     setSearch(value);
   };
@@ -167,15 +195,32 @@ const Home = ({theme, navigation, route}) => {
     <View style={styles.container}>
       <StatusBar backgroundColor={colors.background} barStyle="dark-content" />
       <FlatList
+        ref={scrollRef}
+        onScroll={event => {
+          let yOffset = event.nativeEvent.contentOffset.y;
+          console.log(yOffset);
+          toggleScrollToTop(yOffset);
+        }}
+        onScrollEndDrag={event => {
+          let yOffset = event.nativeEvent.contentOffset.y;
+          console.log(yOffset);
+          toggleScrollToTop(yOffset);
+        }}
         renderItem={renderDrink}
         data={cocktails}
         keyExtractor={item => item.idDrink}
         ListHeaderComponent={
           <View style={styles.header}>
-            <FontAwesome5
-              name="chevron-left"
-              size={25}
+            <IconButton
+              icon={() => (
+                <FontAwesome5
+                  name="chevron-left"
+                  size={25}
+                  color={colors.accent}
+                />
+              )}
               color={colors.accent}
+              size={20}
               onPress={() => navigation.goBack()}
             />
             <Text style={styles.title}>{name + 's'}</Text>
@@ -185,6 +230,9 @@ const Home = ({theme, navigation, route}) => {
         contentContainerStyle={styles.flatList}
         showsVerticalScrollIndicator={false}
       />
+      <Portal>
+        {showScrollToTop === true && <ToTop scrollToTop={scrollToTop} />}
+      </Portal>
     </View>
   );
 };

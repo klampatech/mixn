@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   View,
   StyleSheet,
@@ -7,9 +7,17 @@ import {
   Image,
   ActivityIndicator,
 } from 'react-native';
-import {Text, Card, Searchbar, Subheading, Paragraph} from 'react-native-paper';
+import {
+  Text,
+  Card,
+  Searchbar,
+  Subheading,
+  Paragraph,
+  Portal,
+} from 'react-native-paper';
 import {useTheme} from 'react-native-paper';
 import useDebounce from '../hooks/useDebounce';
+import ToTop from '../components/ToTop';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import RNBootSplash from 'react-native-bootsplash';
 import store from '../assets/store';
@@ -22,6 +30,36 @@ const Home = ({theme, navigation}) => {
   const [loader, setLoader] = useState(true);
   const [cocktails, setCocktails] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [showScrollToTop, setShowScrollToTop] = useState(false);
+  const scrollRef = useRef(null);
+
+  const toggleScrollToTop = scrollY => {
+    if (scrollY > 300) {
+      if (setShowScrollToTop !== true) {
+        setShowScrollToTop(true);
+      }
+    } else {
+      if (setShowScrollToTop !== false) {
+        setShowScrollToTop(false);
+      }
+    }
+  };
+
+  // const ToTop = (scrollRef) => {
+  //   return (
+  //     <FAB
+  //       style={styles.fab}
+  //       large
+  //       icon="chevron-up"
+  //       onPress={() => scrollToTop()}
+  //     />
+  //   );
+  // };
+
+  const scrollToTop = () => {
+    scrollRef.current.scrollToOffset({y: 0, animated: true});
+  };
+
   const onSearch = value => {
     setSearch(value);
   };
@@ -194,6 +232,17 @@ const Home = ({theme, navigation}) => {
       onLayout={() => RNBootSplash.hide({fade: true})}>
       <StatusBar backgroundColor={colors.background} barStyle="dark-content" />
       <FlatList
+        ref={scrollRef}
+        onScroll={event => {
+          let yOffset = event.nativeEvent.contentOffset.y;
+          console.log(yOffset);
+          toggleScrollToTop(yOffset);
+        }}
+        onScrollEndDrag={event => {
+          let yOffset = event.nativeEvent.contentOffset.y;
+          console.log(yOffset);
+          toggleScrollToTop(yOffset);
+        }}
         renderItem={search.length === 0 ? renderCategory : renderDrink}
         data={search.length === 0 ? categories : cocktails}
         keyExtractor={item => item.idDrink}
@@ -226,6 +275,9 @@ const Home = ({theme, navigation}) => {
         contentContainerStyle={styles.flatList}
         showsVerticalScrollIndicator={false}
       />
+      <Portal>
+        {showScrollToTop === true && <ToTop scrollToTop={scrollToTop} />}
+      </Portal>
     </View>
   );
 };
@@ -289,5 +341,10 @@ const styles = StyleSheet.create({
   loader: {
     flex: 1,
     justifyContent: 'center',
+  },
+  title: {
+    fontSize: 36,
+    paddingLeft: 25,
+    paddingRight: 25,
   },
 });

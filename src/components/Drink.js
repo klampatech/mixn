@@ -7,6 +7,7 @@ import {
   Text,
   Divider,
   Caption,
+  IconButton,
 } from 'react-native-paper';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import {useTheme} from 'react-native-paper';
@@ -35,10 +36,12 @@ const Drink = ({image, name, recipe, mix, navigation, back = true}) => {
       contentContainerStyle={{flexGrow: 1}}
       showsVerticalScrollIndicator={false}>
       <View style={styles.header}>
-        <FontAwesome5
-          name="chevron-left"
-          size={25}
+        <IconButton
+          icon={() => (
+            <FontAwesome5 name="chevron-left" size={25} color={colors.accent} />
+          )}
           color={colors.accent}
+          size={20}
           onPress={navigateBack}
         />
         <Text style={styles.title}>{name}</Text>

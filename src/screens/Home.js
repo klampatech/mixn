@@ -22,7 +22,7 @@ import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import RNBootSplash from 'react-native-bootsplash';
 import store from '../assets/store';
 
-const Home = ({theme, navigation}) => {
+const Home = ({theme, navigation, route}) => {
   //import paper theme colors
   const {colors} = useTheme();
   const [search, setSearch] = useState('');
@@ -44,17 +44,6 @@ const Home = ({theme, navigation}) => {
       }
     }
   };
-
-  // const ToTop = (scrollRef) => {
-  //   return (
-  //     <FAB
-  //       style={styles.fab}
-  //       large
-  //       icon="chevron-up"
-  //       onPress={() => scrollToTop()}
-  //     />
-  //   );
-  // };
 
   const scrollToTop = () => {
     scrollRef.current.scrollToOffset({y: 0, animated: true});
@@ -133,14 +122,15 @@ const Home = ({theme, navigation}) => {
       <Card
         style={{...styles.card, marginTop: index === 0 ? 25 : null}}
         elevation={3}
-        onPress={() =>
+        onPress={() => {
+          setShowScrollToTop(false);
           navigation.navigate('Details', {
             name: item.strDrink,
             image: item.strDrinkThumb,
             mix: collectIngredients(item),
             recipe: item.strInstructions,
-          })
-        }>
+          });
+        }}>
         <Card.Title
           title={item.strDrink}
           titleStyle={styles.cardTitle}
@@ -236,12 +226,10 @@ const Home = ({theme, navigation}) => {
         ref={scrollRef}
         onScroll={event => {
           let yOffset = event.nativeEvent.contentOffset.y;
-          console.log(yOffset);
           toggleScrollToTop(yOffset);
         }}
         onScrollEndDrag={event => {
           let yOffset = event.nativeEvent.contentOffset.y;
-          console.log(yOffset);
           toggleScrollToTop(yOffset);
         }}
         renderItem={search.length === 0 ? renderCategory : renderDrink}

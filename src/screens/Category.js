@@ -29,6 +29,7 @@ const Home = ({theme, navigation, route}) => {
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebounce(search, 200);
   const [loader, setLoader] = useState(false);
+  const [loaderIndex, setLoaderIndex] = useState(null);
   const [cocktails, setCocktails] = useState([]);
   const [categories, setCategories] = useState([]);
   const name = route.params.name;
@@ -55,20 +56,21 @@ const Home = ({theme, navigation, route}) => {
     setSearch(value);
   };
   const getCocktails = val => {
-    return fetch(
-      `https://www.thecocktaildb.com/api/json/v2/${store.apiKey}/filter.php?c=${val}`,
-    )
-      .then(response => response.json())
-      .then(data => {
-        console.log(data.drinks);
-        setCocktails(data.drinks);
-      })
-      .catch(error => {
-        console.error(error);
-      });
+    return new Promise(resolve => {
+      fetch(
+        `https://www.thecocktaildb.com/api/json/v2/${store.apiKey}/filter.php?c=${val}`,
+      )
+        .then(response => response.json())
+        .then(data => resolve(data.drinks))
+        .catch(error => {
+          console.error(error);
+          resolve();
+        });
+    });
   };
 
   const getDrink = id => {
+    setLoader(true);
     return new Promise(resolve => {
       fetch(
         `https://www.thecocktaildb.com/api/json/v2/${store.apiKey}/lookup.php?i=${id}`,
@@ -77,10 +79,12 @@ const Home = ({theme, navigation, route}) => {
         .then(data => {
           console.log('drink by id', data.drinks);
           resolve(data.drinks[0]);
+          setLoader(false);
         })
         .catch(error => {
           console.error(error);
           resolve();
+          setLoader(false);
         });
     });
   };
@@ -121,34 +125,38 @@ const Home = ({theme, navigation, route}) => {
     return ingredients;
   };
 
-  const renderDrink = ({item, index}) =>
-    loader === true && index === 0 ? (
-      <Loader />
-    ) : loader === false ? (
-      <Card
-        style={{...styles.card, marginTop: index === 0 ? 25 : null}}
-        elevation={3}
-        //poll drink info to pass to details
-        onPress={() => {
-          getDrink(item.idDrink).then(drink => {
-            navigation.navigate('Details', {
-              name: drink.strDrink,
-              image: drink.strDrinkThumb,
-              mix: collectIngredients(drink),
-              recipe: drink.strInstructions,
-            });
+  const renderDrink = ({item, index}) => (
+    <Card
+      style={{...styles.card, marginTop: index === 0 ? 25 : null}}
+      elevation={3}
+      //poll drink info to pass to details
+      onPress={() => {
+        setLoaderIndex(index);
+        getDrink(item.idDrink).then(drink => {
+          setShowScrollToTop(false);
+          navigation.navigate('Details', {
+            name: drink.strDrink,
+            image: drink.strDrinkThumb,
+            mix: collectIngredients(drink),
+            recipe: drink.strInstructions,
           });
-        }}>
-        <Card.Title
-          title={item.strDrink}
-          titleStyle={styles.cardTitle}
-          titleNumberOfLines={2}
-          right={() => RenderThumbnail(item)}
-          rightStyle={styles.thumbnailContainer}
-        />
-      </Card>
-    ) : null;
-
+        });
+      }}>
+      <Card.Title
+        title={item.strDrink}
+        titleStyle={styles.cardTitle}
+        titleNumberOfLines={2}
+        right={() =>
+          loader === true && loaderIndex === index ? (
+            <Loader />
+          ) : (
+            RenderThumbnail(item)
+          )
+        }
+        rightStyle={styles.thumbnailContainer}
+      />
+    </Card>
+  );
   const Loader = () => {
     return (
       <View style={styles.loader}>
@@ -159,7 +167,11 @@ const Home = ({theme, navigation, route}) => {
 
   useEffect(() => {
     if (isFocused === true && cocktails.length === 0) {
-      getCocktails(name);
+      setLoader(true);
+      getCocktails(name).then(data => {
+        setCocktails(data);
+        setLoader(false);
+      });
     }
   }, [isFocused]);
 

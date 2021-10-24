@@ -11,6 +11,7 @@ import {
 } from 'react-native-paper';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import {useTheme} from 'react-native-paper';
+import {useEffect} from 'react/cjs/react.development';
 
 const Drink = ({image, name, recipe, mix, navigation, back = true}) => {
   const {colors} = useTheme();

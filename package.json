@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "android": "source ~/.bash_profile && react-native run-android --deviceId ",
-    "androidTest": "source ~/.bash_profile && react-native run-android --variant=release",
+    "androidTest": "source ~/.bash_profile && react-native run-android --variant=debug",
     "ios": "source ~/.bash_profile && react-native run-ios --device",
     "start": "react-native start",
     "test": "jest",
